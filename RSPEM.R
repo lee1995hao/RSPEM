@@ -42,39 +42,6 @@ plot(X[,3], Y)
 
 
 
-data_genreation <- function(n, Beta_number, zero_number, int, rho,om1 = 0.1,om2 = 0.05, aa = 20, plot = T){
-  Beta <- rep(0,Beta_number)
-  non_zero_position <- sample(2:length(Beta), length(Beta) - 1 - zero_number)
-  Beta[1] <- int
-  Beta[non_zero_position] <- sample(c(-0.2, 0.3, 0.6), length(non_zero_position), replace = T)
-  
-  p <- length(Beta) - 1
-  mat <- matrix(NA, p, p)
-  for(k in 1:p){
-    for(j in 1:p){ mat[k,j]=rho^(abs(k-j)) }
-  }
-  
-  X <- mvrnorm(n, rep(0,p), mat) 
-  
-  Mu <- as.vector( exp(cbind(1,X)%*%Beta) )
-  Y <- rpois(n, Mu)
-  
-  #outlier
-  ch <- sample(c(0, 1, 2), size=n, prob=c(1-om1-om2, om1, om2), replace=T)
-  Y[ch==1] <- 0
-  Y[ch==2] <- Y[ch==2] + aa
-  
-  if(plot == T){plot(X[,6],Y)}
-  
-  
-  
-  return(list(X = X,Y = Y, real_Beta = Beta,mu = Mu, nzp =non_zero_position, real_lable = ch))
-}
-
-
-
-
-
 
 
 ##approach algorithm
@@ -192,6 +159,8 @@ lasso_possion_EM_Y <- function(X, Y){
 }
 
 
+
+r_1 <- lasso_possion_EM(X,Y)
 
 
 lasso_possion_EM_DM_Y <- function(X, Y, hBeta){
@@ -312,13 +281,9 @@ v_m <- function(beta,eta,Z_latent,X,Y){
   for(i in 1:length(beta)){
     CI <- cbind(CI, C_I(beta[i], s_d[i],300))
   }
-  return(list(M_p = matrix_v,ci = CI))
+  return(list(M_p = sqrt(diag(matrix_v)),ci = CI))
   
 }
-
-
-
-
 
 
 
